@@ -58,6 +58,8 @@
 
 #define HEARTBEAT_PERIOD_MS 1000
 
+const char BTNAME[] = "Parker's Wireless";
+
 /* @section Main Application Setup
  *
  * @text Listing MainConfiguration shows main application code.
@@ -89,7 +91,7 @@ const uint8_t adv_data[] = {
     // Flags general discoverable
     0x02, BLUETOOTH_DATA_TYPE_FLAGS, APP_AD_FLAGS,
     // Name
-    11, BLUETOOTH_DATA_TYPE_COMPLETE_LOCAL_NAME, 'A', 's', 'h', 't', 'o', 'n', ' ', 'B', 'L', 'E',
+    17, BLUETOOTH_DATA_TYPE_COMPLETE_LOCAL_NAME, 'P', 'a', 'r', 'k', 'e', 'r', '\'', 's', ' ', 'W', 'i', 'r', 'e', 'l', 'e', 's', 's',
     // Incomplete List of 16-bit Service Class UUIDs -- FF10 - only valid for testing!
     0x03, BLUETOOTH_DATA_TYPE_INCOMPLETE_LIST_OF_16_BIT_SERVICE_CLASS_UUIDS, 0x10, 0xff,
 };
