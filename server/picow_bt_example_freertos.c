@@ -22,17 +22,34 @@
 
 int btstack_main(int argc, const char * argv[]);
 static btstack_packet_callback_registration_t hci_event_callback_registration;
+static int num_connections = 0;
 
 static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size){
     UNUSED(size);
     UNUSED(channel);
     bd_addr_t local_addr;
+    bd_addr_t peer_addr;
     if (packet_type != HCI_EVENT_PACKET) return;
     switch(hci_event_packet_get_type(packet)){
         case BTSTACK_EVENT_STATE:
             if (btstack_event_state_get_state(packet) != HCI_STATE_WORKING) return;
             gap_local_bd_addr(local_addr);
             printf("BTstack up and running on %s.\n", bd_addr_to_str(local_addr));
+            break;
+        case HCI_EVENT_META_GAP:
+            // btstack turns both LE connection complete events into this one
+            if (hci_event_gap_meta_get_subevent_code(packet) != GAP_SUBEVENT_LE_CONNECTION_COMPLETE) break;
+            if (gap_subevent_le_connection_complete_get_status(packet) != ERROR_CODE_SUCCESS) break;
+            gap_subevent_le_connection_complete_get_peer_address(packet, peer_addr);
+            num_connections++;
+            printf("connected: %s (handle 0x%04x), %d connection(s)\n", bd_addr_to_str(peer_addr),
+                   gap_subevent_le_connection_complete_get_connection_handle(packet), num_connections);
+            break;
+        case HCI_EVENT_DISCONNECTION_COMPLETE:
+            if (num_connections > 0) num_connections--;
+            printf("disconnected: handle 0x%04x, reason 0x%02x, %d connection(s)\n",
+                   hci_event_disconnection_complete_get_connection_handle(packet),
+                   hci_event_disconnection_complete_get_reason(packet), num_connections);
             break;
         default:
             break;
